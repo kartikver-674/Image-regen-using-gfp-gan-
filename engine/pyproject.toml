@@ -34,6 +34,9 @@ markers = ["slow: real-model tests requiring downloaded weights (deselect with -
 
 [tool.ruff]
 line-length = 100
+# restore_engine/vendor/ is verbatim third-party code (sczhou/CodeFormer arch); keep
+# it byte-for-byte diffable against upstream instead of reformatting it.
+extend-exclude = ["restore_engine/vendor"]
 
 [tool.ruff.lint.isort]
 # Model weights download into ./gfpgan/weights/ at runtime, creating a stray
