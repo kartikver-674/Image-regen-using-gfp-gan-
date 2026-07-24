@@ -31,7 +31,7 @@ def save_comparison(before_bgr: np.ndarray, after_bgr: np.ndarray, dest: str | P
 
     def _fit(img):
         scale = h / img.shape[0]
-        out = cv2.resize(img, (int(round(img.shape[1] * scale)), h))
+        out = cv2.resize(img, (round(img.shape[1] * scale), h))
         return out
 
     left, right = _fit(before_bgr), _fit(after_bgr)
@@ -39,8 +39,8 @@ def save_comparison(before_bgr: np.ndarray, after_bgr: np.ndarray, dest: str | P
     # for small crops instead of using a fixed origin/scale tuned for large ones.
     if h >= 20:
         font_scale = max(h / 480, 0.3)
-        thickness = max(int(round(h / 240)), 1)
-        origin = (max(int(round(h * 0.02)), 2), max(int(round(h * 0.08)), 10))
+        thickness = max(round(h / 240), 1)
+        origin = (max(round(h * 0.02), 2), max(round(h * 0.08), 10))
         for img, label in ((left, "Before"), (right, "After")):
             cv2.putText(img, label, origin, cv2.FONT_HERSHEY_SIMPLEX, font_scale,
                         (255, 255, 255), thickness, cv2.LINE_AA)

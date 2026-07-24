@@ -1,5 +1,4 @@
 # engine/tests/test_cli.py
-from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np

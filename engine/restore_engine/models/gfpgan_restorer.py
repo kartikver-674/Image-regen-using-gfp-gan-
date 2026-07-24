@@ -16,6 +16,9 @@ def _build_bg_upsampler(device: str):
 
     model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
                     num_block=23, num_grow_ch=32, scale=2)
+    # RealESRGANer picks its own device (CUDA if available, else CPU) — it never
+    # sees `device` here, so on --device mps this upsampler still runs on CPU.
+    # The `device` arg below only controls whether fp16 (`half`) is used.
     return RealESRGANer(
         scale=2, model_path=config.REALESRGAN_X2_URL, model=model,
         tile=400, tile_pad=10, pre_pad=0,

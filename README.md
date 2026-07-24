@@ -9,6 +9,9 @@ behind a clean, model-agnostic `FaceRestorer` interface. Milestone M0 of the
 - macOS/Linux; GPU optional. **CPU is the reliable Mac path; MPS is opt-in (`--device mps`).**
 
 ## Setup (once)
+Use a **Python 3.10 or 3.11 virtualenv** before installing — the pins above
+(`numpy<2`, `torch<2.2`, `torchvision<0.17`) can force-downgrade packages in a
+shared/system environment.
 ```bash
 bash setup.sh          # pip-installs engine/ ; weights auto-download on first run
 ```
