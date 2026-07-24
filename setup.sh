@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
-# One-time setup: clone GFPGAN, install deps, download the pretrained model.
+# One-time setup: install the restore engine (pulls GFPGAN 1.4 + Real-ESRGAN from pip).
+# Model weights download automatically on first run.
+# Pins numpy<2/torch<2.2/torchvision<0.17 — run this inside a Python 3.10/3.11
+# virtualenv, not a shared/system environment, or it may downgrade existing packages.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-MODEL=GFPGANv1.3.pth
-MODEL_URL=https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/$MODEL
-
-[ -d GFPGAN ] || git clone https://github.com/TencentARC/GFPGAN.git
-
-pip install -r requirements.txt
-pip install -r GFPGAN/requirements.txt
-(cd GFPGAN && python setup.py develop)
-
-mkdir -p GFPGAN/experiments/pretrained_models
-if [ ! -f "GFPGAN/experiments/pretrained_models/$MODEL" ]; then
-  wget -O "GFPGAN/experiments/pretrained_models/$MODEL" "$MODEL_URL"
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+  echo "Warning: no virtualenv active. Recommended: python3.11 -m venv .venv && source .venv/bin/activate"
 fi
 
-echo "Setup done. Put images in GFPGAN/inputs/tests/ and run: python restore.py"
+python -m pip install -e "engine[dev]"
+
+echo "Setup done. Run:  restory -i path/to/photo.jpg -o results"
+echo "Or the dev self-check:  cd engine && python -m restore_engine.demo"

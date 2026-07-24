@@ -1,0 +1,36 @@
+[project]
+name = "restore-engine"
+version = "0.1.0"
+description = "Old photo restoration engine (M0: GFPGAN 1.4)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy<2",
+    "torch<2.2",
+    "torchvision<0.17",
+    "gfpgan>=1.3.8",
+    "realesrgan>=0.3.0",
+    "basicsr>=1.4.2",
+    "facexlib>=0.3.0",
+    "opencv-python>=4.8",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+restory = "restore_engine.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["restore_engine*"]
+
+[tool.pytest.ini_options]
+markers = ["slow: real-model tests requiring downloaded weights (deselect with -m 'not slow')"]
+
+[tool.ruff]
+line-length = 100

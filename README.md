@@ -1,29 +1,31 @@
-# Old Photo Restoration (GFPGAN)
+# Old Photo Restoration Engine
 
-Runnable port of `GFP_GAN_Old_photo_restoration.ipynb` (originally Google Colab).
-Wraps [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) to restore faces
-in old/degraded photos and upscale the background with Real-ESRGAN.
+In-process GFPGAN 1.4 face restoration with Real-ESRGAN background upsampling,
+behind a clean, model-agnostic `FaceRestorer` interface. Milestone M0 of the
+[product design spec](docs/superpowers/specs/2026-07-24-old-photo-restoration-product-design.md).
 
 ## Requirements
-- Python 3.8–3.10, `git`, `wget`
-- A GPU is recommended (works on CPU, just slow)
+- Python ≥ 3.10 (deps pin `numpy<2`, `torchvision<0.17`, `torch<2.2` for the GFPGAN/basicsr stack)
+- macOS/Linux; GPU optional. **CPU is the reliable Mac path; MPS is opt-in (`--device mps`).**
 
 ## Setup (once)
+Use a **Python 3.10 or 3.11 virtualenv** before installing — the pins above
+(`numpy<2`, `torch<2.2`, `torchvision<0.17`) can force-downgrade packages in a
+shared/system environment.
 ```bash
-bash setup.sh
+bash setup.sh          # pip-installs engine/ ; weights auto-download on first run
 ```
-Clones GFPGAN, installs dependencies, and downloads the `GFPGANv1.3.pth` model.
 
 ## Run
 ```bash
-# Put your images in GFPGAN/inputs/tests/ then:
-python restore.py
-
-# Or point at your own dirs / change scale:
-python restore.py -i my_photos -o my_results -s 4
+restory -i photo.jpg -o results             # single image
+restory -i my_photos/ -o results -s 4       # a folder, 4x upscale
+restory -i photo.jpg -o results --no-bg     # skip background upsampling (faster on CPU)
 ```
+Outputs land in `results/`: `restored_imgs/`, `restored_faces/`, `cropped_faces/`, `comparisons/`.
 
-Outputs land in `GFPGAN/<output>/`:
-- `restored_imgs/` — full restored images
-- `restored_faces/`, `cropped_faces/` — per-face crops
-- `comparisons/` — side-by-side input vs. output PNGs
+## Develop
+```bash
+cd engine && python -m pytest -m "not slow" -v   # fast tests (no weights)
+python -m restore_engine.demo                    # real-model self-check
+```
