@@ -34,8 +34,14 @@ target a phone app (React Native).
 > headline sizes, comfortable body line-height.
 >
 > **Shape & feel:** generously rounded corners (16–20px on cards, pill buttons),
-> soft diffused shadows, subtle film-grain texture on large surfaces, roomy
-> spacing. Thin, rounded line icons.
+> soft diffused shadows, roomy spacing. Thin, rounded line icons.
+>
+> **Texture policy:** a *subtle static* film-grain is allowed ONLY on marketing /
+> empty surfaces (home, empty states) where no user photo is shown. Keep
+> backgrounds flat and clean everywhere a photo is displayed or judged — options,
+> processing, result/comparison, and gallery. NO animated grain and NO WebGL/GL
+> shaders anywhere: any motion must be lightweight CSS/Reanimated (e.g. a shimmer
+> sweep), never a per-frame shader (battery/jank cost on mobile for zero function).
 >
 > **Signature component:** a before/after image comparison slider with a draggable
 > vertical handle and small "Before"/"After" labels in opposite corners.
@@ -73,8 +79,9 @@ target a phone app (React Native).
 
 ### W3 — Processing
 > Desktop web processing screen for Restory. Centered rounded card on a dark warm
-> canvas. The input photo is shown dimmed with an animated shimmer/scan-line
-> overlay sweeping across it. Below the image, a horizontal step indicator with
+> canvas. The input photo is shown dimmed with a lightweight shimmer sweep
+> (CSS/Reanimated only — no WebGL shader, no grain over the photo). Below the
+> image, a horizontal step indicator with
 > four stages — "Analyzing", "Restoring faces", "Upscaling", "Finishing" — the
 > current step highlighted in amber with a slim progress bar. One line of live
 > status text underneath ("Detected 2 faces · using CodeFormer at high fidelity").
@@ -133,8 +140,9 @@ target a phone app (React Native).
 > button pinned to the bottom of the sheet. Thumb-friendly spacing.
 
 ### M3 — Processing
-> Mobile app processing screen for Restory. Full-screen: the input photo with an
-> animated shimmer/scan overlay. Centered, a circular progress indicator in amber;
+> Mobile app processing screen for Restory. Full-screen: the input photo with a
+> lightweight shimmer sweep (Reanimated only — no WebGL shader, no grain over the
+> photo). Centered, a circular progress indicator in amber;
 > beneath the image a compact stage stepper — "Analyzing → Faces → Upscale →
 > Finishing" — current step highlighted. A single line of live status text
 > ("Using CodeFormer at high fidelity"), a small "~15s" estimate, and a quiet
