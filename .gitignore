@@ -3,3 +3,8 @@ results/
 *.pth
 __pycache__/
 *.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.superpowers/
+engine/tests/fixtures/*.jpg
