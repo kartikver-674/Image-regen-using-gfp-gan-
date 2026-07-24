@@ -34,3 +34,11 @@ markers = ["slow: real-model tests requiring downloaded weights (deselect with -
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint.isort]
+# Model weights download into ./gfpgan/weights/ at runtime, creating a stray
+# `gfpgan/` dir that makes ruff auto-detect the third-party `gfpgan` import as
+# local (I001). Pin classification explicitly so the lint gate is deterministic
+# with or without downloaded weights present.
+known-first-party = ["restore_engine"]
+known-third-party = ["gfpgan"]
