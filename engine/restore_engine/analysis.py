@@ -41,13 +41,15 @@ def build_face_detector(device: str | None = None) -> Callable:
     shape at integration time: RetinaFace.detect_faces returns an (N, 15) array
     where cols 0-3 are the bbox and col 4 is the score.
     """
+    import torch
     from facexlib.detection import init_detection_model
 
     dev = config.select_device(device)
     model = init_detection_model("retinaface_resnet50", half=False, device=dev)
 
     def detect(image_bgr: np.ndarray) -> list[tuple]:
-        dets = model.detect_faces(image_bgr, 0.97)
+        with torch.no_grad():
+            dets = model.detect_faces(image_bgr, 0.97)
         return [((d[0], d[1], d[2], d[3]), d[4]) for d in dets]
 
     return detect

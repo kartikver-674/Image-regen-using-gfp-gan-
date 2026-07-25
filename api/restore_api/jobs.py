@@ -49,8 +49,11 @@ class JobRunner:
         self._store.set_running(jid)
         # ponytail: nested 1-thread pool just to get a timeout on a blocking call.
         # On timeout the underlying thread isn't killed (Python can't do that) and
-        # keeps running in the background; acceptable for a local single-user job
-        # runner. Upgrade to a process pool (killable) if that leak matters.
+        # keeps running in the background as a zombie that can race the *next* job
+        # inside EngineService.run - both would hit the shared restorer/cache at
+        # once. EngineService._lock serializes that so it's a leaked thread, not
+        # data corruption. Upgrade to a process pool (killable) if the leak itself
+        # matters.
         worker = ThreadPoolExecutor(max_workers=1)
         try:
             fut = worker.submit(self._service.run, input_path, options, output_dir)

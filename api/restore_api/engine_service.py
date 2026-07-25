@@ -1,6 +1,7 @@
 """Holds the detector + a lazy per-(model, upscale) restorer cache; runs restore_smart."""
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 from restore_engine.analysis import build_face_detector
@@ -15,6 +16,7 @@ class EngineService:
         self._device = device
         self._detector = build_face_detector(device)
         self._cache: dict[tuple[str, int], object] = {}
+        self._lock = threading.Lock()
         # probe CodeFormer availability once (build at default scale; may be None)
         probe = build_codeformer_restorer(device=device, upscale=2)
         self.codeformer_available = probe is not None
@@ -34,7 +36,8 @@ class EngineService:
         return self._cache[key]
 
     def run(self, input_path, options: RestoreOptions, output_dir):
-        return restore_smart(
-            Path(input_path), options, self.get_restorer, self._detector,
-            output_dir=output_dir, codeformer_available=self.codeformer_available,
-        )
+        with self._lock:
+            return restore_smart(
+                Path(input_path), options, self.get_restorer, self._detector,
+                output_dir=output_dir, codeformer_available=self.codeformer_available,
+            )
