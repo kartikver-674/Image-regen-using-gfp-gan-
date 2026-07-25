@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
+.light body, body.light { @apply bg-canvas-light text-neutral-900; }
+
+/* static film grain — ONLY apply the .grain class on Upload + empty Gallery, never over photos */
+.grain::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: 0.05; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* processing shimmer sweep — CSS only, no shader */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.shimmer { position: relative; overflow: hidden; }
+.shimmer::after {
+  content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(232,163,61,0.18), transparent);
+  animation: shimmer 1.6s infinite;
+}
