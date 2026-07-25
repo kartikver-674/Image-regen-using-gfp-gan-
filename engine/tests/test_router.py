@@ -29,6 +29,28 @@ def test_small_faces_route_codeformer_when_available():
     assert "codeformer" in p.rationale.lower()
 
 
+def test_severe_faces_route_hybrid_chain():
+    p = router.route(_analysis([_face(60)]), RestoreOptions(), codeformer_available=True)
+    assert p.face_model == "gfpgan" and p.refine_model == "codeformer" and p.is_chain
+    assert p.refine_fidelity is not None
+    assert "hybrid" in p.rationale.lower()
+
+
+def test_manual_hybrid_routes_chain():
+    p = router.route(_analysis([_face(500)]),
+                     RestoreOptions(mode="manual", model="hybrid", fidelity=0.8),
+                     codeformer_available=True)
+    assert p.face_model == "gfpgan" and p.refine_model == "codeformer"
+    assert p.refine_fidelity == 0.8
+
+
+def test_manual_hybrid_falls_back_when_codeformer_unavailable():
+    p = router.route(_analysis([_face(500)]),
+                     RestoreOptions(mode="manual", model="hybrid"),
+                     codeformer_available=False)
+    assert p.face_model == "gfpgan" and p.refine_model is None and not p.is_chain
+
+
 def test_degraded_faces_fall_back_to_gfpgan_when_codeformer_unavailable():
     p = router.route(_analysis([_face(100)]), RestoreOptions(), codeformer_available=False)
     assert p.face_model == "gfpgan"

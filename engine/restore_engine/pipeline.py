@@ -10,7 +10,7 @@ from restore_engine import analysis as _analysis
 from restore_engine import config, io
 from restore_engine import router as _router
 from restore_engine.models.base import FaceRestorer
-from restore_engine.types import RestoreOptions, RestoreResult
+from restore_engine.types import FaceResult, Restoration, RestoreOptions, RestoreResult
 
 
 def restore_image(path, restorer: FaceRestorer, output_dir=None) -> RestoreResult:
@@ -48,6 +48,39 @@ def restore_path(path, restorer: FaceRestorer, output_dir) -> list[RestoreResult
     return [restore_image(t, restorer, output_dir) for t in targets]
 
 
+def restore_multi_stage(image_bgr, stages: list[tuple[FaceRestorer, float | None]]) -> Restoration:
+    """Run restorers in sequence, each refining the previous stage's full output.
+
+    `stages` is [(restorer, fidelity), ...] — a single-item list is the plain
+    single-model path; two items is the GFPGAN→CodeFormer hybrid chain. Stage 2+
+    restorers should be built at upscale=1 / no bg upsampler, since stage 1 already
+    produced the target resolution and background.
+
+    Per-face before/after pairs the ORIGINAL input crop (stage 1) with the FINAL
+    restored crop, so comparison images stay honest across the chain.
+    """
+    if not stages:
+        raise ValueError("restore_multi_stage needs at least one stage")
+    current = image_bgr
+    first = last = None
+    names = []
+    for restorer, fidelity in stages:
+        last = restorer.restore(current, fidelity=fidelity)
+        if first is None:
+            first = last
+        current = last.restored_image
+        names.append(last.model)
+    faces = [
+        FaceResult(
+            index=i,
+            cropped=first.faces[i].cropped if i < len(first.faces) else rf.cropped,
+            restored=rf.restored,
+        )
+        for i, rf in enumerate(last.faces)
+    ]
+    return Restoration(restored_image=last.restored_image, faces=faces, model="+".join(names))
+
+
 def restore_smart(path, options: RestoreOptions, get_restorer, detector,
                   output_dir=None, codeformer_available: bool = True) -> RestoreResult:
     image = io.read_image(path)
@@ -57,13 +90,19 @@ def restore_smart(path, options: RestoreOptions, get_restorer, detector,
         image = cv2.resize(image, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA)
     an = _analysis.analyze(image, detector)
     plan = _router.route(an, options, codeformer_available=codeformer_available)
-    restorer = get_restorer(plan.face_model, plan.upscale)
+
+    stages = [(get_restorer(plan.face_model, plan.upscale), plan.fidelity)]
+    if plan.is_chain:
+        # Refiner runs at 1x with no bg upsampler: stage 1 already upscaled + enhanced bg.
+        refiner = get_restorer(plan.refine_model, 1, use_bg_upsampler=False)
+        stages.append((refiner, plan.refine_fidelity))
+
     t0 = time.perf_counter()
-    r = restorer.restore(image, fidelity=plan.fidelity)
+    r = restore_multi_stage(image, stages)
     elapsed = time.perf_counter() - t0
     result = RestoreResult(
         input_path=str(path), restored_image=r.restored_image, faces=r.faces,
-        model=r.model, device=restorer.device, elapsed_s=elapsed, analysis=an, routing=plan,
+        model=r.model, device=stages[0][0].device, elapsed_s=elapsed, analysis=an, routing=plan,
     )
     if output_dir is not None:
         write_outputs(result, output_dir)

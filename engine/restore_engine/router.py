@@ -14,8 +14,18 @@ def route(analysis: Analysis, options: RestoreOptions, codeformer_available: boo
         return RoutePlan(face_model=model, fidelity=fidelity, upscale=upscale,
                          background_upscale=bg, colorize_recommended=colorize, rationale=rationale)
 
+    def chain(refine_fidelity, rationale):
+        # Stage 1 = GFPGAN (macro structure), stage 2 = CodeFormer refine (micro-texture).
+        return RoutePlan(face_model="gfpgan", fidelity=None, upscale=upscale,
+                         background_upscale=bg, colorize_recommended=colorize, rationale=rationale,
+                         refine_model="codeformer", refine_fidelity=refine_fidelity)
+
     if options.mode == "manual":
         model = options.model or "gfpgan"
+        if model == "hybrid":
+            if not codeformer_available:
+                return plan("gfpgan", None, "manual hybrid: CodeFormer unavailable → GFPGAN")
+            return chain(options.fidelity, f"manual: hybrid GFPGAN→CodeFormer (w={options.fidelity})")
         if model == "codeformer" and not codeformer_available:
             return plan("gfpgan", None, "manual: CodeFormer unavailable → GFPGAN")
         fidelity = options.fidelity if model == "codeformer" else None
@@ -29,8 +39,15 @@ def route(analysis: Analysis, options: RestoreOptions, codeformer_available: boo
         or min(f.det_score for f in analysis.faces) < config.LOW_DET_SCORE
         or analysis.blur_score < config.BLUR_SHARP_THRESHOLD
     )
+    severe = (
+        analysis.min_face_size < config.TINY_FACE_PX
+        or analysis.blur_score < config.BLUR_SEVERE_THRESHOLD
+    )
     if degraded:
-        if codeformer_available:
-            return plan("codeformer", 0.7, "small/low-quality faces → CodeFormer (robust)")
-        return plan("gfpgan", None, "degraded faces but CodeFormer unavailable → GFPGAN")
+        if not codeformer_available:
+            return plan("gfpgan", None, "degraded faces but CodeFormer unavailable → GFPGAN")
+        if severe:
+            return chain(config.HYBRID_REFINE_FIDELITY,
+                         "severely degraded faces → hybrid GFPGAN→CodeFormer refine")
+        return plan("codeformer", 0.7, "small/low-quality faces → CodeFormer (robust)")
     return plan("gfpgan", None, "clear faces → GFPGAN (natural)")

@@ -11,6 +11,13 @@ BLUR_SHARP_THRESHOLD = 100.0
 SMALL_FACE_PX = 256
 LOW_DET_SCORE = 0.85
 GRAYSCALE_SAT_THRESHOLD = 10.0
+
+# Hybrid (GFPGAN->CodeFormer chain) tier: only the *severely* degraded inputs get
+# the 2-pass treatment. Between these and the SMALL/SHARP thresholds above, a single
+# CodeFormer pass is enough. Tune per your input distribution.
+TINY_FACE_PX = 96               # face smaller than this (before upscale) => chain
+BLUR_SEVERE_THRESHOLD = 40.0    # Laplacian variance below this => chain
+HYBRID_REFINE_FIDELITY = 0.8    # CodeFormer w for the refine pass (0..1, higher=faithful)
 MAX_UPLOAD_BYTES = 26214400
 MAX_INPUT_DIM = 2000
 JOB_TIMEOUT_S = 300

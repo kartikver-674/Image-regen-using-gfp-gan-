@@ -40,10 +40,12 @@ def _result_payload(job_id: str, result) -> dict:
             "min_face_size": result.analysis.min_face_size,
         },
         "routing": {
-            "model_used": result.routing.face_model,
+            "model_used": result.model,  # combined "gfpgan-1.4+codeformer" for a chain
             "fidelity": result.routing.fidelity,
             "upscale": result.routing.upscale,
             "background_upscale": result.routing.background_upscale,
+            "refine_model": result.routing.refine_model,
+            "refine_fidelity": result.routing.refine_fidelity,
             "rationale": result.routing.rationale,
         },
         "device": result.device,

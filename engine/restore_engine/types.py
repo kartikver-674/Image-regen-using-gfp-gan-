@@ -24,7 +24,7 @@ class Restoration:
 @dataclass
 class RestoreOptions:
     mode: str = "auto"              # "auto" | "manual"
-    model: str | None = None        # "gfpgan" | "codeformer" (manual only)
+    model: str | None = None        # "gfpgan" | "codeformer" | "hybrid" (manual only)
     fidelity: float = 0.7           # CodeFormer w (0=sharper/invented .. 1=faithful)
     upscale: int = 2
     background_upscale: bool = True
@@ -57,12 +57,19 @@ class Analysis:
 
 @dataclass
 class RoutePlan:
-    face_model: str                 # "gfpgan" | "codeformer"
-    fidelity: float | None
+    face_model: str                 # stage-1 model: "gfpgan" | "codeformer"
+    fidelity: float | None          # stage-1 fidelity (CodeFormer only)
     upscale: int
     background_upscale: bool
     colorize_recommended: bool
     rationale: str
+    # When set, stage 1 is followed by a refine pass on its output (the hybrid chain).
+    refine_model: str | None = None         # e.g. "codeformer"
+    refine_fidelity: float | None = None     # refine-pass CodeFormer w
+
+    @property
+    def is_chain(self) -> bool:
+        return self.refine_model is not None
 
 
 @dataclass

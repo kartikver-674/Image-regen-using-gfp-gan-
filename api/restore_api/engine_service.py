@@ -15,24 +15,27 @@ class EngineService:
     def __init__(self, device: str | None = None):
         self._device = device
         self._detector = build_face_detector(device)
-        self._cache: dict[tuple[str, int], object] = {}
+        self._cache: dict[tuple[str, int, bool], object] = {}
         self._lock = threading.Lock()
         # probe CodeFormer availability once (build at default scale; may be None)
         probe = build_codeformer_restorer(device=device, upscale=2)
         self.codeformer_available = probe is not None
         if probe is not None:
-            self._cache[("codeformer", 2)] = probe
+            self._cache[("codeformer", 2, True)] = probe
 
-    def get_restorer(self, model: str, upscale: int):
-        key = (model, upscale)
+    def get_restorer(self, model: str, upscale: int, use_bg_upsampler: bool = True):
+        key = (model, upscale, use_bg_upsampler)
         if key not in self._cache:
             if model == "codeformer":
-                r = build_codeformer_restorer(device=self._device, upscale=upscale)
-                if r is None:
-                    r = build_gfpgan_restorer(device=self._device, upscale=upscale)  # safety net
+                r = build_codeformer_restorer(device=self._device, upscale=upscale,
+                                              use_bg_upsampler=use_bg_upsampler)
+                if r is None:  # safety net (also used as the hybrid refiner)
+                    r = build_gfpgan_restorer(device=self._device, upscale=upscale,
+                                              use_bg_upsampler=use_bg_upsampler)
                 self._cache[key] = r
             else:
-                self._cache[key] = build_gfpgan_restorer(device=self._device, upscale=upscale)
+                self._cache[key] = build_gfpgan_restorer(device=self._device, upscale=upscale,
+                                                         use_bg_upsampler=use_bg_upsampler)
         return self._cache[key]
 
     def run(self, input_path, options: RestoreOptions, output_dir):
