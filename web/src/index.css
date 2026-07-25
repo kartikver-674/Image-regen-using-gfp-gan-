@@ -33,8 +33,8 @@ body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
    its focusable handle-root and our custom handle is aria-hidden, so without this
    a keyboard user gets zero visual feedback on the focused divider. */
 [data-rcs="handle-root"]:focus-visible {
-  outline: 2px solid #E8A33D;
-  outline-offset: 2px;
+  outline: 2px solid #E8A33D !important; /* library sets outline:0 via inline style — !important is required to win */
+  outline-offset: 2px !important;
   border-radius: 9999px;
 }
 /* gentle mount reveal — motion only when the user allows it */
