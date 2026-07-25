@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { StepIndicator } from '../components/StepIndicator'
+import { ScannerFrame } from '../components/ScannerFrame'
 import { useHistory } from '../hooks/useHistory'
 import { usePollJob } from '../hooks/usePollJob'
 import { useUpload } from '../UploadContext'
@@ -21,7 +22,7 @@ function statusText(state: NavState): string {
       ? `Using CodeFormer at ${fidelityLabel(ui.fidelity)} fidelity`
       : 'Using GFPGAN'
   }
-  return 'Restoring your photo — this runs on CPU, ~30–60s'
+  return 'Analysing the photo and choosing the best restoration'
 }
 
 export default function Processing() {
@@ -35,9 +36,11 @@ export default function Processing() {
   // ponytail: cosmetic stage ticker — the API reports no sub-stage progress, so
   // this just walks the 4 labels on a timer. It does NOT reflect real server state.
   const [stage, setStage] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
   useEffect(() => {
-    const t = setInterval(() => setStage(s => Math.min(s + 1, 3)), 8000)
-    return () => clearInterval(t)
+    const s = setInterval(() => setStage(x => Math.min(x + 1, 3)), 8000)
+    const e = setInterval(() => setElapsed(x => x + 1), 1000)
+    return () => { clearInterval(s); clearInterval(e) }
   }, [])
 
   useEffect(() => {
@@ -56,9 +59,10 @@ export default function Processing() {
 
   if (job.status === 'error') {
     return (
-      <main className="mx-auto max-w-lg px-6 py-16 text-center">
-        <p className="text-coral">{job.error}</p>
-        <Link to="/" className="btn-tertiary mt-4">Try again</Link>
+      <main className="mx-auto max-w-lg px-6 py-20 text-center">
+        <p className="font-serif text-2xl">That restoration didn't finish</p>
+        <p className="mt-2 text-sm text-muted">{job.error}</p>
+        <Link to="/" className="btn-primary mt-6">Try again</Link>
       </main>
     )
   }
@@ -66,21 +70,20 @@ export default function Processing() {
   return (
     <main className="mx-auto max-w-lg px-6 py-16 text-center">
       {upload && (
-        <div className="shimmer overflow-hidden rounded-card border border-amber/20 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.7)] opacity-60">
-          <img src={upload.previewUrl} alt="" className="h-full w-full object-cover" />
-        </div>
+        <ScannerFrame scan="active">
+          <img src={upload.previewUrl} alt="" className="block max-h-[52vh] w-full object-contain opacity-75" />
+        </ScannerFrame>
       )}
 
-      <h1 className="mt-8 font-serif text-3xl tracking-tight">In the darkroom</h1>
+      <h1 className="mt-9 font-serif text-3xl font-medium tracking-tight">Restoring your photo</h1>
       <p className="mt-2 text-muted">{statusText(state ?? {})}</p>
-      <p className="mt-1 text-sm text-muted opacity-70">~30–60s</p>
+      <p className="eyebrow mt-3">Elapsed {elapsed}s · runs on CPU · ~30–60s</p>
 
-      <div className="mt-8">
+      <div className="mt-9">
         <StepIndicator activeIndex={stage} />
       </div>
 
-      <button type="button" onClick={() => { clear(); nav('/') }}
-        className="btn-tertiary mt-8">
+      <button type="button" onClick={() => { clear(); nav('/') }} className="btn-tertiary mt-9">
         Cancel
       </button>
     </main>

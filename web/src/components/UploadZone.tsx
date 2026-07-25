@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { ScanLine } from './ScanLine'
 
 const MAX = 26214400
 export function UploadZone({ onFile }: { onFile: (f: File) => void }) {
@@ -19,23 +20,42 @@ export function UploadZone({ onFile }: { onFile: (f: File) => void }) {
         onDragOver={e => { e.preventDefault(); setOver(true) }}
         onDragLeave={() => setOver(false)}
         onDrop={e => { e.preventDefault(); setOver(false); pick(e.dataTransfer.files?.[0]) }}
-        className={`focus-ring group w-full rounded-card border-2 border-dashed p-16 text-center transition
-          ${over ? 'border-amber bg-amber/[0.07]' : 'border-neutral-600 hover:border-neutral-500 hover:bg-white/[0.02]'}`}
+        className="focus-ring group relative block w-full overflow-hidden rounded-frame px-8 py-16 text-center transition duration-300 ease-resolve"
+        style={{
+          border: `1px solid ${over ? 'var(--amber)' : 'var(--hairline-strong)'}`,
+          background: over
+            ? 'radial-gradient(60% 80% at 50% 30%, rgba(232,163,61,0.12), transparent 70%), var(--surface)'
+            : 'linear-gradient(180deg, var(--sheen), transparent 60%), var(--surface)',
+          boxShadow: over
+            ? '0 0 0 1px rgba(232,163,61,0.4), 0 30px 70px -30px rgba(232,163,61,0.35)'
+            : '0 30px 70px -40px rgba(0,0,0,0.8)',
+        }}
       >
-        <svg
-          viewBox="0 0 24 24" fill="none" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
-          aria-hidden="true"
-          className={`mx-auto h-11 w-11 transition ${over ? 'text-amber' : 'text-amber/80 group-hover:text-amber'}`}
+        <span className="frame-corner tl transition-opacity group-hover:opacity-100" style={{ opacity: over ? 1 : 0.6 }} aria-hidden="true" />
+        <span className="frame-corner tr transition-opacity group-hover:opacity-100" style={{ opacity: over ? 1 : 0.6 }} aria-hidden="true" />
+        <span className="frame-corner bl transition-opacity group-hover:opacity-100" style={{ opacity: over ? 1 : 0.6 }} aria-hidden="true" />
+        <span className="frame-corner br transition-opacity group-hover:opacity-100" style={{ opacity: over ? 1 : 0.6 }} aria-hidden="true" />
+        <ScanLine active={over} />
+
+        <span
+          className="mx-auto grid h-14 w-14 place-items-center rounded-2xl transition duration-300"
+          style={{ border: '1px solid var(--hairline-strong)', background: 'var(--sheen)' }}
         >
-          <path stroke="currentColor" d="M12 15V4m0 0L8.5 7.5M12 4l3.5 3.5" />
-          <path stroke="currentColor" d="M4 14v3.5A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V14" />
-        </svg>
-        <p className="mt-4 font-sans">Drag a photo here, or <span className="text-amber underline underline-offset-4">click to browse</span></p>
-        <p className="mt-1.5 text-sm text-muted">JPG, PNG · up to 25 MB</p>
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
+            aria-hidden="true"
+            className={`h-7 w-7 transition-colors duration-300 ${over ? 'text-amber' : 'text-amber/80 group-hover:text-amber'}`}>
+            <path stroke="currentColor" d="M12 16V5m0 0L8 9m4-4 4 4" />
+            <path stroke="currentColor" d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+          </svg>
+        </span>
+
+        <p className="mt-5 font-sans text-base">
+          Drop a photo to restore, or <span className="text-amber underline decoration-amber/40 underline-offset-4">browse</span>
+        </p>
+        <p className="eyebrow mt-2.5">JPG · PNG · up to 25 MB</p>
       </button>
-      <input ref={input} type="file" accept="image/*" hidden
-             onChange={e => pick(e.target.files?.[0])} />
-      {err && <p role="alert" className="mt-3 text-coral text-sm">{err}</p>}
+      <input ref={input} type="file" accept="image/*" hidden onChange={e => pick(e.target.files?.[0])} />
+      {err && <p role="alert" className="mt-3 text-sm text-coral">{err}</p>}
     </div>
   )
 }

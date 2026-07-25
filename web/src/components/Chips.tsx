@@ -17,10 +17,7 @@ export function Chips({ items }: { items: string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((c, i) => (
-        <span
-          key={c}
-          className="chip inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-sans text-sm"
-        >
+        <span key={c} className="chip">
           {i === 0 && <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />}
           {c}
         </span>
