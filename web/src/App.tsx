@@ -4,8 +4,7 @@ import Upload from './routes/Upload'
 import Options from './routes/Options'
 import Processing from './routes/Processing'
 import Result from './routes/Result'
-
-const Stub = ({ name }: { name: string }) => <div className="p-8">{name}</div>
+import Gallery from './routes/Gallery'
 
 export default function App() {
   const { theme, toggle } = useTheme()
@@ -23,7 +22,7 @@ export default function App() {
         <Route path="/options" element={<Options />} />
         <Route path="/processing/:jobId" element={<Processing />} />
         <Route path="/result/:jobId" element={<Result />} />
-        <Route path="/gallery" element={<Stub name="Gallery" />} />
+        <Route path="/gallery" element={<Gallery />} />
       </Routes>
     </div>
   )

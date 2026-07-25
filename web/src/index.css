@@ -43,3 +43,72 @@ body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
   @keyframes result-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
   .result-reveal { animation: result-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 }
+
+/* ── W5 gallery — darkroom contact sheet ─────────────────────────────────── */
+/* The framed print: hairline warm border + soft shadow, theme-aware. */
+.gallery-print {
+  border: 1px solid rgba(232, 163, 61, 0.16);
+  box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.65);
+  transition: box-shadow .3s ease, border-color .3s ease, transform .3s cubic-bezier(.2, .7, .2, 1);
+}
+.light .gallery-print {
+  border-color: rgba(176, 118, 42, 0.24);
+  box-shadow: 0 12px 28px -16px rgba(74, 47, 12, 0.30);
+}
+/* Hover lift is motion only; reduced-motion users keep the static print. */
+@media (prefers-reduced-motion: no-preference) {
+  .gallery-card:hover .gallery-print {
+    transform: translateY(-3px);
+    border-color: rgba(232, 163, 61, 0.36);
+    box-shadow: 0 20px 38px -16px rgba(0, 0, 0, 0.72);
+  }
+  .light .gallery-card:hover .gallery-print {
+    box-shadow: 0 22px 40px -18px rgba(74, 47, 12, 0.38);
+  }
+}
+
+/* Before / After annotation — small darkroom tag, both labels share the corner. */
+.gallery-cue {
+  position: absolute; left: 8px; bottom: 8px; z-index: 5;
+  padding: 2px 8px; border-radius: 9999px;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: #FAF6EF; background: rgba(15, 15, 18, .62);
+  border: 1px solid rgba(255, 255, 255, .12);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Quiet remove control — coral hint on hover. */
+.gallery-remove {
+  color: #FAF6EF; background: rgba(15, 15, 18, .55);
+  border: 1px solid rgba(255, 255, 255, .14);
+  backdrop-filter: blur(4px);
+}
+.gallery-remove:hover { background: rgba(232, 103, 76, .92); border-color: transparent; }
+
+/* Model chip — subtle dark surface, hairline border (amber dot lives in markup). */
+.gallery-chip {
+  background: rgba(0, 0, 0, .25);
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+.light .gallery-chip {
+  background: rgba(15, 15, 18, .05);
+  border-color: rgba(15, 15, 18, .14);
+}
+
+/* Empty-state framed-print placeholder — CSS only, no photo. */
+.gallery-frame {
+  width: 176px; height: 176px; border-radius: 18px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(232, 163, 61, .22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .02), rgba(255, 255, 255, 0)), #15151b;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, .6), inset 0 0 0 10px rgba(255, 255, 255, .02);
+}
+.gallery-frame::after {
+  content: ''; width: 10px; height: 10px; border-radius: 9999px; background: rgba(232, 163, 61, .5);
+}
+.light .gallery-frame {
+  border-color: rgba(176, 118, 42, .28);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .02), rgba(0, 0, 0, 0)), #F2ECE0;
+  box-shadow: 0 14px 30px -16px rgba(74, 47, 12, .25), inset 0 0 0 10px rgba(0, 0, 0, .02);
+}
