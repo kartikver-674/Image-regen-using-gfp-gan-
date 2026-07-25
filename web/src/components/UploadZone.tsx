@@ -35,7 +35,7 @@ export function UploadZone({ onFile }: { onFile: (f: File) => void }) {
       </button>
       <input ref={input} type="file" accept="image/*" hidden
              onChange={e => pick(e.target.files?.[0])} />
-      {err && <p className="mt-3 text-coral text-sm">{err}</p>}
+      {err && <p role="alert" className="mt-3 text-coral text-sm">{err}</p>}
     </div>
   )
 }
