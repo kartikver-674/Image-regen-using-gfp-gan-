@@ -1,5 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { buildOptions, resolveUrl } from './api'
+import { addEntry, loadHistory, removeEntry } from './historyStore'
+import type { HistoryEntry } from './types'
 
 describe('resolveUrl', () => {
   it('prefixes relative API urls with the base', () => {
@@ -25,9 +27,6 @@ describe('buildOptions', () => {
       .toEqual({ mode: 'manual', model: 'codeformer', fidelity: 0.8, upscale: 4 })
   })
 })
-
-import { addEntry, loadHistory, removeEntry } from './historyStore'
-import type { HistoryEntry } from './types'
 
 const entry = (jobId: string): HistoryEntry => ({
   jobId, name: 'p.jpg', date: '2026-07-25T00:00:00Z',
