@@ -5,6 +5,7 @@ export type Analysis = {
 export type Routing = {
   model_used: string; fidelity: number | null; upscale: number;
   background_upscale: boolean; rationale: string
+  refine_model?: string | null; refine_fidelity?: number | null
 }
 export type JobResult = {
   restored_url: string
@@ -18,7 +19,7 @@ export type JobStatus = {
 }
 export type RestoreOptions = {
   mode: 'auto' | 'manual'
-  model?: 'gfpgan' | 'codeformer'
+  model?: 'gfpgan' | 'codeformer' | 'hybrid'
   fidelity?: number
   upscale?: 2 | 4
   background_upscale?: boolean

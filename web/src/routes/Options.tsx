@@ -8,12 +8,18 @@ import { useReveal } from '../lib/motion'
 const MODELS = [
   { id: 'gfpgan', label: 'GFPGAN', hint: 'Natural, lifelike faces' },
   { id: 'codeformer', label: 'CodeFormer', hint: 'Robust on heavy damage' },
+  { id: 'hybrid', label: 'Hybrid', hint: 'Two-pass — only for severe inputs' },
 ] as const
+
+const MODEL_LABELS: Record<UiOptions['model'], string> = {
+  gfpgan: 'GFPGAN', codeformer: 'CodeFormer', hybrid: 'Hybrid',
+}
+const USES_FIDELITY = (m: UiOptions['model']) => m === 'codeformer' || m === 'hybrid'
 
 function summary(ui: UiOptions): string {
   if (ui.mode === 'auto') return 'Auto · smart routing'
-  const bits = ['Manual', ui.model === 'codeformer' ? 'CodeFormer' : 'GFPGAN', `${ui.upscale}×`]
-  if (ui.model === 'codeformer') bits.push(`fidelity ${ui.fidelity.toFixed(2)}`)
+  const bits = ['Manual', MODEL_LABELS[ui.model], `${ui.upscale}×`]
+  if (USES_FIDELITY(ui.model)) bits.push(`fidelity ${ui.fidelity.toFixed(2)}`)
   return bits.join(' · ')
 }
 
@@ -68,7 +74,7 @@ export default function Options() {
 
         {ui.mode === 'manual' && (
           <div className="mt-6 space-y-6">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {MODELS.map(m => (
                 <button key={m.id} type="button" aria-pressed={ui.model === m.id}
                   onClick={() => setUi(u => ({ ...u, model: m.id }))}
@@ -87,11 +93,11 @@ export default function Options() {
                 <span className="eyebrow">Faithful</span>
               </div>
               <input type="range" min={0} max={1} step={0.05} value={ui.fidelity} aria-label="Fidelity"
-                disabled={ui.model !== 'codeformer'}
+                disabled={!USES_FIDELITY(ui.model)}
                 onChange={e => setUi(u => ({ ...u, fidelity: Number(e.target.value) }))}
                 className="slider focus-ring mt-3 w-full" />
-              {ui.model !== 'codeformer' && (
-                <p className="mt-2 text-xs text-muted">Fidelity is available with CodeFormer.</p>
+              {!USES_FIDELITY(ui.model) && (
+                <p className="mt-2 text-xs text-muted">Fidelity is available with CodeFormer and Hybrid.</p>
               )}
             </div>
 

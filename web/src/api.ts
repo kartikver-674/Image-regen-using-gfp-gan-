@@ -9,16 +9,19 @@ export function resolveUrl(rel: string): string {
 
 export type UiOptions = {
   mode: 'auto' | 'manual'
-  model: 'gfpgan' | 'codeformer'
+  model: 'gfpgan' | 'codeformer' | 'hybrid'
   fidelity: number
   upscale: 2 | 4
   colorize: boolean // cosmetic — never sent
 }
 
+// Hybrid runs GFPGAN then a CodeFormer refine pass, so it uses the fidelity knob too.
+const USES_FIDELITY = new Set(['codeformer', 'hybrid'])
+
 export function buildOptions(o: UiOptions): RestoreOptions {
   if (o.mode === 'auto') return { mode: 'auto' }
   const out: RestoreOptions = { mode: 'manual', model: o.model, upscale: o.upscale }
-  if (o.model === 'codeformer') out.fidelity = o.fidelity
+  if (USES_FIDELITY.has(o.model)) out.fidelity = o.fidelity
   return out
 }
 
