@@ -2,6 +2,7 @@ import { Link, Route, Routes } from 'react-router-dom'
 import { useTheme } from './theme'
 import Upload from './routes/Upload'
 import Options from './routes/Options'
+import Processing from './routes/Processing'
 
 const Stub = ({ name }: { name: string }) => <div className="p-8">{name}</div>
 
@@ -19,7 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Upload />} />
         <Route path="/options" element={<Options />} />
-        <Route path="/processing/:jobId" element={<Stub name="Processing" />} />
+        <Route path="/processing/:jobId" element={<Processing />} />
         <Route path="/result/:jobId" element={<Stub name="Result" />} />
         <Route path="/gallery" element={<Stub name="Gallery" />} />
       </Routes>
