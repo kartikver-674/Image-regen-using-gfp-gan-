@@ -4,9 +4,6 @@ import { useHistory } from '../hooks/useHistory'
 import { whatWeDid } from '../components/Chips'
 import type { HistoryEntry } from '../types'
 
-const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
-
 export default function Gallery() {
   const { entries, remove } = useHistory()
   const nav = useNavigate()
@@ -15,15 +12,11 @@ export default function Gallery() {
     return (
       <main className="grain mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
         <div className="gallery-frame" aria-hidden="true" />
-        <h1 className="mt-10 font-serif text-4xl">No restorations yet</h1>
-        <p className="mt-3 font-sans text-neutral-400">
+        <h1 className="mt-10 font-serif text-4xl tracking-tight">No restorations yet</h1>
+        <p className="mt-3 font-sans text-muted">
           Your restored prints gather here, like a darkroom archive.
         </p>
-        <button
-          type="button"
-          onClick={() => nav('/')}
-          className={`mt-8 rounded-full bg-amber px-7 py-3 font-medium text-black transition hover:brightness-105 ${focusRing}`}
-        >
+        <button type="button" onClick={() => nav('/')} className="btn-primary mt-8">
           Restore your first photo
         </button>
       </main>
@@ -33,8 +26,8 @@ export default function Gallery() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8">
-        <h1 className="font-serif text-4xl">Your restorations</h1>
-        <p className="mt-1 font-sans text-sm text-neutral-400">
+        <h1 className="font-serif text-4xl tracking-tight">Your restorations</h1>
+        <p className="mt-1 font-sans text-sm text-muted">
           {entries.length} photo{entries.length > 1 ? 's' : ''}
         </p>
       </header>
@@ -56,6 +49,7 @@ function Card({ entry, onOpen, onRemove }: { entry: HistoryEntry; onOpen: () => 
     <div
       role="button"
       tabIndex={0}
+      aria-label={`Open ${entry.name}`}
       onClick={onOpen}
       // keydown bubbles up from the remove button too — only navigate when the card itself is focused
       onKeyDown={e => {
@@ -65,7 +59,7 @@ function Card({ entry, onOpen, onRemove }: { entry: HistoryEntry; onOpen: () => 
           onOpen()
         }
       }}
-      className={`gallery-card group cursor-pointer rounded-card text-left ${focusRing}`}
+      className="gallery-card focus-ring group cursor-pointer rounded-card text-left"
     >
       {/* The print: restored is the face; the original peeks in on hover. */}
       <div className="gallery-print relative aspect-square overflow-hidden rounded-card">
@@ -98,7 +92,7 @@ function Card({ entry, onOpen, onRemove }: { entry: HistoryEntry; onOpen: () => 
             e.stopPropagation()
             onRemove()
           }}
-          className={`gallery-remove absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full text-base leading-none opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 ${focusRing}`}
+          className="gallery-remove focus-ring absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full text-base leading-none opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
         >
           <span aria-hidden="true">×</span>
         </button>
@@ -107,10 +101,10 @@ function Card({ entry, onOpen, onRemove }: { entry: HistoryEntry; onOpen: () => 
       {/* Caption strip below the frame */}
       <div className="px-1 pt-3">
         <div className="truncate font-sans text-sm">{entry.name}</div>
-        <div className="mt-0.5 font-sans text-xs text-neutral-500">
+        <div className="mt-0.5 font-sans text-xs text-muted">
           {new Date(entry.date).toLocaleDateString()}
         </div>
-        <span className="gallery-chip mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-sans text-xs">
+        <span className="chip mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-sans text-xs">
           <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />
           {model}
         </span>

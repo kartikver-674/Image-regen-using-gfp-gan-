@@ -58,7 +58,7 @@ export default function Processing() {
     return (
       <main className="mx-auto max-w-lg px-6 py-16 text-center">
         <p className="text-coral">{job.error}</p>
-        <Link to="/" className="mt-4 inline-block underline">Try again</Link>
+        <Link to="/" className="btn-tertiary mt-4">Try again</Link>
       </main>
     )
   }
@@ -66,20 +66,21 @@ export default function Processing() {
   return (
     <main className="mx-auto max-w-lg px-6 py-16 text-center">
       {upload && (
-        <div className="shimmer overflow-hidden rounded-card border border-neutral-700 opacity-50">
+        <div className="shimmer overflow-hidden rounded-card border border-amber/20 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.7)] opacity-60">
           <img src={upload.previewUrl} alt="" className="h-full w-full object-cover" />
         </div>
       )}
 
-      <p className="mt-8">{statusText(state ?? {})}</p>
-      <p className="mt-1 text-sm text-neutral-500">~30–60s</p>
+      <h1 className="mt-8 font-serif text-3xl tracking-tight">In the darkroom</h1>
+      <p className="mt-2 text-muted">{statusText(state ?? {})}</p>
+      <p className="mt-1 text-sm text-muted opacity-70">~30–60s</p>
 
       <div className="mt-8">
         <StepIndicator activeIndex={stage} />
       </div>
 
       <button type="button" onClick={() => { clear(); nav('/') }}
-        className="mt-8 text-sm text-neutral-400 underline">
+        className="btn-tertiary mt-8">
         Cancel
       </button>
     </main>

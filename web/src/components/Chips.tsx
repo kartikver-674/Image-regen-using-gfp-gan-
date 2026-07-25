@@ -19,7 +19,7 @@ export function Chips({ items }: { items: string[] }) {
       {items.map((c, i) => (
         <span
           key={c}
-          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-500/40 px-3 py-1 font-sans text-sm"
+          className="chip inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-sans text-sm"
         >
           {i === 0 && <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />}
           {c}

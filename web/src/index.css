@@ -2,10 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root { color-scheme: dark; --muted: #a8a29e; } /* warm graphite, ~6:1 on #0F0F12 */
+.light { color-scheme: light; --muted: #6b6459; } /* warm graphite, ~5:1 on #FAF6EF */
 html, body, #root { height: 100%; }
 body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
 .light body, body.light { @apply bg-canvas-light text-neutral-900; }
+
+/* ── Shared design-system utilities (cohesion pass) ──────────────────────────
+   One home for the tokens every screen repeats: muted text, focus ring, the
+   three button tiers, card surface, and the chip surface. Keeps W1–W5 in sync. */
+.text-muted { color: var(--muted); }
+
+@layer components {
+  /* Amber keyboard focus ring — single definition, used across every screen. */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-transparent;
+  }
+
+  /* Buttons: primary amber pill / secondary ghost / tertiary text. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-amber px-7 py-3 font-medium text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-transparent;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-neutral-600 px-7 py-3 transition hover:border-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-transparent;
+  }
+  .light .btn-secondary { @apply border-neutral-400 hover:border-neutral-500; }
+  .btn-tertiary {
+    @apply inline-flex items-center justify-center rounded px-2 py-1 text-sm underline underline-offset-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-transparent;
+    color: var(--muted);
+  }
+  .btn-tertiary:hover { color: inherit; }
+
+  /* Card surface — subtle warm depth on dark, hairline in both themes. */
+  .card {
+    @apply rounded-card;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0));
+  }
+  .light .card {
+    border-color: rgba(15, 15, 18, .10);
+    background: linear-gradient(180deg, rgba(15, 15, 18, .02), rgba(15, 15, 18, 0));
+  }
+
+  /* Chip surface — shared by Result + Gallery (amber dot lives in markup). */
+  .chip {
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .04);
+  }
+  .light .chip {
+    border-color: rgba(15, 15, 18, .14);
+    background: rgba(15, 15, 18, .04);
+  }
+}
 
 /* static film grain — ONLY apply the .grain class on Upload + empty Gallery, never over photos */
 .grain::before {
@@ -20,6 +68,12 @@ body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(232,163,61,0.18), transparent);
   animation: shimmer 1.6s infinite;
+}
+
+/* Processing stepper — the current bar breathes under darkroom light (motion only). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes step-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .step-active { animation: step-breathe 1.6s ease-in-out infinite; }
 }
 
 /* W4 result — warm darkroom halo BEHIND the hero print (never over the photo).
@@ -85,15 +139,10 @@ body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
   backdrop-filter: blur(4px);
 }
 .gallery-remove:hover { background: rgba(232, 103, 76, .92); border-color: transparent; }
-
-/* Model chip — subtle dark surface, hairline border (amber dot lives in markup). */
-.gallery-chip {
-  background: rgba(0, 0, 0, .25);
-  border: 1px solid rgba(255, 255, 255, .12);
-}
-.light .gallery-chip {
-  background: rgba(15, 15, 18, .05);
-  border-color: rgba(15, 15, 18, .14);
+/* Touch / no-hover devices can't reveal a hover-only control — keep remove visible
+   there so it's discoverable on mobile (the default 2-col breakpoint). */
+@media (hover: none) {
+  .gallery-remove { opacity: 1 !important; }
 }
 
 /* Empty-state framed-print placeholder — CSS only, no photo. */

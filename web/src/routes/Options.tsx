@@ -26,21 +26,25 @@ export default function Options() {
   }
 
   return (
-    <main className="mx-auto grid max-w-5xl gap-10 px-6 py-12 md:grid-cols-2">
-      <div className="overflow-hidden rounded-card border border-neutral-700">
+    <main className="mx-auto grid max-w-5xl items-start gap-10 px-6 py-12 md:grid-cols-2">
+      {/* The print under the loupe — framed like the result + gallery prints */}
+      <div className="overflow-hidden rounded-card border border-amber/20 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.7)]">
         <img src={upload.previewUrl} alt="Selected photo" className="h-full w-full object-cover" />
       </div>
 
-      <div className="rounded-card border border-neutral-700 p-6">
-        <div className="flex rounded-full border border-neutral-600 p-1 text-sm">
+      <div className="card p-6">
+        <h1 className="font-serif text-2xl tracking-tight">Restore options</h1>
+        <p className="mt-1 text-sm text-muted">We pick sensible defaults — adjust them if you like.</p>
+
+        <div className="mt-6 flex rounded-full border border-neutral-600 p-1 text-sm">
           <button type="button" aria-pressed={ui.mode === 'auto'}
             onClick={() => setUi(u => ({ ...u, mode: 'auto' }))}
-            className={`flex-1 rounded-full py-2 transition ${ui.mode === 'auto' ? 'bg-amber text-black' : ''}`}>
+            className={`focus-ring flex-1 rounded-full py-2 font-medium transition ${ui.mode === 'auto' ? 'bg-amber text-black' : 'text-muted'}`}>
             Auto (recommended)
           </button>
           <button type="button" aria-pressed={ui.mode === 'manual'}
             onClick={() => setUi(u => ({ ...u, mode: 'manual' }))}
-            className={`flex-1 rounded-full py-2 transition ${ui.mode === 'manual' ? 'bg-amber text-black' : ''}`}>
+            className={`focus-ring flex-1 rounded-full py-2 font-medium transition ${ui.mode === 'manual' ? 'bg-amber text-black' : 'text-muted'}`}>
             Manual
           </button>
         </div>
@@ -51,40 +55,47 @@ export default function Options() {
               {MODELS.map(m => (
                 <button key={m.id} type="button" aria-pressed={ui.model === m.id}
                   onClick={() => setUi(u => ({ ...u, model: m.id }))}
-                  className={`rounded-card border p-4 text-left transition ${ui.model === m.id ? 'border-amber' : 'border-neutral-600'}`}>
+                  className={`focus-ring card relative p-4 text-left transition ${ui.model === m.id ? '!border-amber ring-1 ring-amber' : 'hover:!border-neutral-500'}`}>
+                  {ui.model === m.id && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-amber" aria-hidden="true" />}
                   <div className="font-serif text-lg">{m.label}</div>
-                  <div className="text-sm text-neutral-400">{m.hint}</div>
+                  <div className="text-sm text-muted">{m.hint}</div>
                 </button>
               ))}
             </div>
 
             <div>
-              <div className="flex justify-between text-sm text-neutral-400">
+              <div className="flex justify-between text-sm text-muted">
                 <span>Natural ←</span>
                 <span>→ Faithful</span>
               </div>
               <input type="range" min={0} max={1} step={0.05} value={ui.fidelity} aria-label="Fidelity"
                 disabled={ui.model !== 'codeformer'}
                 onChange={e => setUi(u => ({ ...u, fidelity: Number(e.target.value) }))}
-                className="mt-2 w-full accent-amber disabled:opacity-40" />
+                className="focus-ring mt-2 w-full rounded-full accent-amber disabled:opacity-40" />
+              {ui.model !== 'codeformer' && (
+                <p className="mt-1.5 text-xs text-muted">Fidelity is available with CodeFormer.</p>
+              )}
             </div>
 
-            <div className="flex w-fit rounded-full border border-neutral-600 p-1 text-sm">
-              {([2, 4] as const).map(x => (
-                <button key={x} type="button" aria-pressed={ui.upscale === x}
-                  onClick={() => setUi(u => ({ ...u, upscale: x }))}
-                  className={`rounded-full px-5 py-2 transition ${ui.upscale === x ? 'bg-amber text-black' : ''}`}>
-                  {x}×
-                </button>
-              ))}
+            <div>
+              <div className="mb-2 text-sm text-muted">Upscale</div>
+              <div className="flex w-fit rounded-full border border-neutral-600 p-1 text-sm">
+                {([2, 4] as const).map(x => (
+                  <button key={x} type="button" aria-pressed={ui.upscale === x}
+                    onClick={() => setUi(u => ({ ...u, upscale: x }))}
+                    className={`focus-ring rounded-full px-5 py-2 font-medium transition ${ui.upscale === x ? 'bg-amber text-black' : 'text-muted'}`}>
+                    {x}×
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         <div className="mt-6 flex items-center justify-between rounded-card border border-neutral-700 p-4 opacity-60">
           <div>
-            <div>Colorize</div>
-            <div className="text-sm text-neutral-400">Colorization coming soon (F2)</div>
+            <div className="font-medium">Colorize</div>
+            <div className="text-sm text-muted">Colorization coming soon (F2)</div>
           </div>
           <input type="checkbox" checked={false} disabled readOnly aria-label="Colorize (disabled)" />
         </div>
@@ -92,12 +103,12 @@ export default function Options() {
         {err && <p className="mt-4 text-sm text-coral">{err}</p>}
 
         <button type="button" onClick={onRestore} disabled={busy}
-          className="mt-6 w-full rounded-full bg-amber py-3 font-medium text-black transition disabled:opacity-60">
+          className="btn-primary mt-6 w-full">
           {busy ? 'Restoring…' : 'Restore photo'}
         </button>
 
         <button type="button" onClick={() => nav('/')}
-          className="mt-3 w-full text-center text-sm text-neutral-400 underline">
+          className="btn-tertiary mt-3 w-full">
           Choose a different photo
         </button>
       </div>

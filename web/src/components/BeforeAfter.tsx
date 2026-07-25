@@ -20,7 +20,9 @@ const labelCls =
 
 export function BeforeAfter({ before, after }: { before: string; after: string }) {
   return (
-    <div className="relative overflow-hidden rounded-card border border-amber/20 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]">
+    <div className="relative max-h-[min(72vh,640px)] overflow-hidden rounded-card border border-amber/20 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]">
+      {/* Cap height so a tall portrait can't dominate/overflow the fold. The frame
+          clips; images keep their aspect (object-cover) so before/after stay aligned. */}
       <ReactCompareSlider
         handle={<ResultHandle />}
         itemOne={<ReactCompareSliderImage src={before} alt="Before restoration" />}
