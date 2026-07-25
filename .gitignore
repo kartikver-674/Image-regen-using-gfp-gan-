@@ -8,3 +8,5 @@ __pycache__/
 .pytest_cache/
 .superpowers/
 engine/tests/fixtures/*.jpg
+web/node_modules/
+web/dist/
