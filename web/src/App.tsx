@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { useTheme } from './theme'
 import Upload from './routes/Upload'
+import Options from './routes/Options'
 
 const Stub = ({ name }: { name: string }) => <div className="p-8">{name}</div>
 
@@ -17,7 +18,7 @@ export default function App() {
       </nav>
       <Routes>
         <Route path="/" element={<Upload />} />
-        <Route path="/options" element={<Stub name="Options" />} />
+        <Route path="/options" element={<Options />} />
         <Route path="/processing/:jobId" element={<Stub name="Processing" />} />
         <Route path="/result/:jobId" element={<Stub name="Result" />} />
         <Route path="/gallery" element={<Stub name="Gallery" />} />
