@@ -2,21 +2,30 @@ import { useNavigate } from 'react-router-dom'
 import { resolveUrl } from '../api'
 import { useHistory } from '../hooks/useHistory'
 import { whatWeDid } from '../components/Chips'
+import { ScannerFrame } from '../components/ScannerFrame'
+import { useReveal } from '../lib/motion'
 import type { HistoryEntry } from '../types'
 
 export default function Gallery() {
   const { entries, remove } = useHistory()
   const nav = useNavigate()
+  const scope = useReveal<HTMLElement>([entries.length])
 
   if (entries.length === 0) {
     return (
-      <main className="grain mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
-        <div className="gallery-frame" aria-hidden="true" />
-        <h1 className="mt-10 font-serif text-4xl tracking-tight">No restorations yet</h1>
-        <p className="mt-3 font-sans text-muted">
-          Your restored prints gather here, like a darkroom archive.
+      <main ref={scope} className="mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
+        <div data-reveal className="w-44">
+          <ScannerFrame scan="idle" className="aspect-square">
+            <div className="grid h-full place-items-center">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber/60" aria-hidden="true" />
+            </div>
+          </ScannerFrame>
+        </div>
+        <h1 data-reveal className="mt-10 font-serif text-4xl font-medium tracking-tight">No restorations yet</h1>
+        <p data-reveal className="mt-3 max-w-sm font-sans text-muted">
+          Every photo you restore is kept here, ready to revisit or download again.
         </p>
-        <button type="button" onClick={() => nav('/')} className="btn-primary mt-8">
+        <button data-reveal type="button" onClick={() => nav('/')} className="btn-primary mt-8">
           Restore your first photo
         </button>
       </main>
@@ -24,17 +33,15 @@ export default function Gallery() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main ref={scope} className="mx-auto max-w-6xl px-6 py-10">
       <header className="mb-8">
-        <h1 className="font-serif text-4xl tracking-tight">Your restorations</h1>
-        <p className="mt-1 font-sans text-sm text-muted">
-          {entries.length} photo{entries.length > 1 ? 's' : ''}
-        </p>
+        <h1 className="font-serif text-4xl font-medium tracking-tight">Your restorations</h1>
+        <p className="eyebrow mt-2">{entries.length} photo{entries.length > 1 ? 's' : ''} restored</p>
       </header>
 
       <ul className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
         {entries.map(e => (
-          <li key={e.jobId}>
+          <li key={e.jobId} data-reveal>
             <Card entry={e} onOpen={() => nav(`/result/${e.jobId}`)} onRemove={() => remove(e.jobId)} />
           </li>
         ))}
@@ -101,10 +108,8 @@ function Card({ entry, onOpen, onRemove }: { entry: HistoryEntry; onOpen: () => 
       {/* Caption strip below the frame */}
       <div className="px-1 pt-3">
         <div className="truncate font-sans text-sm">{entry.name}</div>
-        <div className="mt-0.5 font-sans text-xs text-muted">
-          {new Date(entry.date).toLocaleDateString()}
-        </div>
-        <span className="chip mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-sans text-xs">
+        <div className="eyebrow mt-1">{new Date(entry.date).toLocaleDateString()}</div>
+        <span className="chip mt-2.5">
           <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />
           {model}
         </span>
