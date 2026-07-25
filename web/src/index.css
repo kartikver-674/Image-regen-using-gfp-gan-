@@ -29,6 +29,14 @@ body { @apply bg-canvas-dark text-neutral-100 font-sans antialiased; }
   background: radial-gradient(58% 52% at 50% 46%, rgba(232,163,61,0.20), transparent 72%);
   filter: blur(52px);
 }
+/* Keyboard focus for the slider divider — the library hard-codes outline:0 on
+   its focusable handle-root and our custom handle is aria-hidden, so without this
+   a keyboard user gets zero visual feedback on the focused divider. */
+[data-rcs="handle-root"]:focus-visible {
+  outline: 2px solid #E8A33D;
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
 /* gentle mount reveal — motion only when the user allows it */
 .result-reveal { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
