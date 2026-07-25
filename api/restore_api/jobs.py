@@ -4,7 +4,10 @@ from __future__ import annotations
 import traceback
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeoutError
 from threading import Lock
+
+from restore_engine import config
 
 
 class JobStore:
@@ -44,11 +47,21 @@ class JobRunner:
 
     def _run(self, jid, input_path, options, output_dir):
         self._store.set_running(jid)
+        # ponytail: nested 1-thread pool just to get a timeout on a blocking call.
+        # On timeout the underlying thread isn't killed (Python can't do that) and
+        # keeps running in the background; acceptable for a local single-user job
+        # runner. Upgrade to a process pool (killable) if that leak matters.
+        worker = ThreadPoolExecutor(max_workers=1)
         try:
-            result = self._service.run(input_path, options, output_dir)
+            fut = worker.submit(self._service.run, input_path, options, output_dir)
+            result = fut.result(timeout=config.JOB_TIMEOUT_S)
             self._store.set_done(jid, result)
+        except FutureTimeoutError:
+            self._store.set_error(jid, f"job timed out after {config.JOB_TIMEOUT_S}s")
         except Exception as exc:  # noqa: BLE001 - surface any failure as job error
             self._store.set_error(jid, f"{exc}\n{traceback.format_exc()}")
+        finally:
+            worker.shutdown(wait=False)
 
     def shutdown(self, wait: bool = True):
         self._pool.shutdown(wait=wait)

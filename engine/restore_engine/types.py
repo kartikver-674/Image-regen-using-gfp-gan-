@@ -74,5 +74,5 @@ class RestoreResult:
     model: str
     device: str
     elapsed_s: float
-    analysis: "Analysis | None" = None
-    routing: "RoutePlan | None" = None
+    analysis: Analysis | None = None
+    routing: RoutePlan | None = None

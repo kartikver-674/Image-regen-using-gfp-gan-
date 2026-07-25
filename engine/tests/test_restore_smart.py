@@ -1,6 +1,6 @@
 import numpy as np
 
-from restore_engine import pipeline
+from restore_engine import config, pipeline
 from restore_engine.io import write_image
 from restore_engine.models.base import FaceRestorer
 from restore_engine.types import FaceResult, Restoration, RestoreOptions
@@ -45,6 +45,18 @@ def test_restore_smart_routes_and_attaches_metadata(tmp_path):
     assert codeformer.last_fidelity == 0.7        # router-chosen fidelity forwarded
     assert result.analysis.n_faces == 1
     assert result.device == "cpu" and result.elapsed_s >= 0
+
+
+def test_restore_smart_downscales_oversize_input(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "MAX_INPUT_DIM", 32)  # cheap to exercise without a huge fixture
+    p = tmp_path / "in.png"
+    write_image(np.full((64, 16, 3), 90, dtype=np.uint8), p)  # longest side 64 > cap
+    r = RecordingRestorer("gfpgan")
+
+    result = pipeline.restore_smart(
+        p, RestoreOptions(), lambda m, u: r, lambda _img: [], codeformer_available=False,
+    )
+    assert result.analysis.height == 32 and result.analysis.width == 8
 
 
 def test_restore_smart_writes_outputs(tmp_path):

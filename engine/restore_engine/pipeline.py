@@ -4,8 +4,10 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+import cv2
+
 from restore_engine import analysis as _analysis
-from restore_engine import io
+from restore_engine import config, io
 from restore_engine import router as _router
 from restore_engine.models.base import FaceRestorer
 from restore_engine.types import RestoreOptions, RestoreResult
@@ -49,6 +51,10 @@ def restore_path(path, restorer: FaceRestorer, output_dir) -> list[RestoreResult
 def restore_smart(path, options: RestoreOptions, get_restorer, detector,
                   output_dir=None, codeformer_available: bool = True) -> RestoreResult:
     image = io.read_image(path)
+    h, w = image.shape[:2]
+    if max(h, w) > config.MAX_INPUT_DIM:  # guardrail: cap pathologically large uploads
+        scale = config.MAX_INPUT_DIM / max(h, w)
+        image = cv2.resize(image, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA)
     an = _analysis.analyze(image, detector)
     plan = _router.route(an, options, codeformer_available=codeformer_available)
     restorer = get_restorer(plan.face_model, plan.upscale)
