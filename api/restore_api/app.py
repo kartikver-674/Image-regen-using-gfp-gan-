@@ -83,7 +83,8 @@ def create_app(service=None, results_root=None) -> FastAPI:
         jid = store.create()
         job_dir = results_root / jid
         job_dir.mkdir(parents=True, exist_ok=True)
-        input_path = job_dir / (file.filename or "input.png")
+        safe_name = Path(file.filename or "input.png").name or "input.png"
+        input_path = job_dir / safe_name
         input_path.write_bytes(data)
 
         runner = state["runner"] or JobRunner(state["service"] or EngineService(), store, 1)

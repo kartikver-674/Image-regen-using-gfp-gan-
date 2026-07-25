@@ -71,3 +71,38 @@ def test_rejects_oversize_upload(tmp_path):
     resp = c.post("/jobs", files={"file": ("big.png", big, "image/png")},
                   data={"options": json.dumps({"mode": "auto"})})
     assert resp.status_code == 413
+
+
+def test_rejects_bad_options_json(tmp_path):
+    c = _client(tmp_path)
+    resp = c.post("/jobs",
+                  files={"file": ("in.png", _png_bytes(), "image/png")},
+                  data={"options": "{not valid json"})
+    assert resp.status_code == 422
+
+
+def test_path_traversal_filename_stays_in_job_dir(tmp_path):
+    results_root = tmp_path / "results"
+    c = TestClient(create_app(service=FakeService(), results_root=results_root))
+    resp = c.post("/jobs",
+                  files={"file": ("../../evil.png", _png_bytes(), "image/png")},
+                  data={"options": json.dumps({"mode": "auto"})})
+    assert resp.status_code == 202
+    jid = resp.json()["job_id"]
+
+    body = {}
+    for _ in range(50):
+        body = c.get(f"/jobs/{jid}").json()
+        if body["status"] in ("done", "error"):
+            break
+        time.sleep(0.05)
+    assert body["status"] == "done"
+
+    # The sanitized basename may legitimately land inside the job dir under
+    # results_root — that's fine. What must NOT happen is escaping above
+    # results_root (e.g. straight into tmp_path via "../../evil.png").
+    assert not (tmp_path / "evil.png").exists()
+    escaped = [p for p in tmp_path.rglob("evil.png") if results_root not in p.parents]
+    assert escaped == [], f"path traversal wrote outside results_root: {escaped}"
+    # And it did land where expected: inside this job's own directory.
+    assert (results_root / jid / "evil.png").exists()
