@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import json
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -64,6 +66,17 @@ def create_app(service=None, results_root=None) -> FastAPI:
         state["runner"].shutdown(wait=False)
 
     app = FastAPI(lifespan=lifespan)
+    origins = [
+        o.strip()
+        for o in os.environ.get("RESTORE_CORS_ORIGINS", "http://localhost:5173").split(",")
+        if o.strip()
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.mount("/results", StaticFiles(directory=str(results_root)), name="results")
 
     @app.get("/healthz")

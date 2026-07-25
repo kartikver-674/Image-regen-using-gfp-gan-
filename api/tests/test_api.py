@@ -106,3 +106,10 @@ def test_path_traversal_filename_stays_in_job_dir(tmp_path):
     assert escaped == [], f"path traversal wrote outside results_root: {escaped}"
     # And it did land where expected: inside this job's own directory.
     assert (results_root / jid / "evil.png").exists()
+
+
+def test_cors_allows_dev_origin(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/healthz", headers={"Origin": "http://localhost:5173"})
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:5173"
