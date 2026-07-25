@@ -33,7 +33,9 @@ class GfpganRestorer(FaceRestorer):
         self._restorer = restorer
         self.device = device
 
-    def restore(self, image_bgr: np.ndarray) -> Restoration:
+    def restore(self, image_bgr: np.ndarray, fidelity: float | None = None) -> Restoration:
+        # GFPGAN has no fidelity knob (that's a CodeFormer concept) — accepted for
+        # interface parity with FaceRestorer, ignored here.
         cropped, restored, restored_img = self._restorer.enhance(
             image_bgr, has_aligned=False, only_center_face=False, paste_back=True,
         )

@@ -13,6 +13,6 @@ class FaceRestorer(ABC):
     device: str
 
     @abstractmethod
-    def restore(self, image_bgr: np.ndarray) -> Restoration:
+    def restore(self, image_bgr: np.ndarray, fidelity: float | None = None) -> Restoration:
         """Restore faces in a BGR uint8 image; return the full result + face crops."""
         raise NotImplementedError
