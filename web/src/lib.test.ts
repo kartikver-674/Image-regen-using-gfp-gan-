@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { buildOptions, resolveUrl } from './api'
 import { addEntry, loadHistory, removeEntry } from './historyStore'
 import { whatWeDid } from './components/Chips'
+import { labelVisibility } from './components/BeforeAfter'
 import type { HistoryEntry } from './types'
 
 describe('resolveUrl', () => {
@@ -64,6 +65,48 @@ describe('whatWeDid', () => {
   })
   it('is_grayscale adds the B&W chip', () => {
     expect(whatWeDid(withAnalysis('bw', { is_grayscale: true }))).toContain('B&W detected')
+  })
+})
+
+describe('labelVisibility', () => {
+  // A 600px frame with pills roughly the size the mono/tracking type renders at.
+  const frame = { width: 600, beforeWidth: 62, afterWidth: 54 }
+  const at = (position: number) => labelVisibility({ ...frame, position })
+
+  it('shows both labels while the divider sits clear of either pill', () => {
+    expect(at(50)).toEqual({ before: true, after: true })
+  })
+
+  it('hides "Before" at 0% — the before image is fully clipped away', () => {
+    expect(at(0).before).toBe(false)
+  })
+
+  it('hides "After" at 100% — the after image is fully clipped away', () => {
+    expect(at(100).after).toBe(false)
+  })
+
+  it('hides "Before" before the grip column can cover it', () => {
+    // Pill occupies x 12..74; the w-10 grip reaches 20px left of the divider,
+    // so the label must go by the time the divider passes x=94 (≈15.7%).
+    expect(at(14).before).toBe(false)
+    expect(at(20).before).toBe(true)
+  })
+
+  it('hides "After" before the grip column can cover it', () => {
+    // Pill occupies x 534..588; the grip reaches 20px right of the divider,
+    // so the label must go once the divider passes x=514 (≈85.7%).
+    expect(at(87).after).toBe(false)
+    expect(at(80).after).toBe(true)
+  })
+
+  it('keeps the opposite label visible when one side collapses', () => {
+    expect(at(0).after).toBe(true)
+    expect(at(100).before).toBe(true)
+  })
+
+  it('hides both before the frame has been measured', () => {
+    expect(labelVisibility({ width: 0, position: 50, beforeWidth: 0, afterWidth: 0 }))
+      .toEqual({ before: false, after: false })
   })
 })
 
